@@ -45,3 +45,5 @@ I trained the model on 6 A100-40G-PCIE for 100 epochs, which roughly takes 10 ho
 
 To change the hyperparameters of the training process, please take a look at the codes in `main.py` and `model.py`.
 
+## Results
+Some examples of the generated color image can be found in the `figure/` directory.
