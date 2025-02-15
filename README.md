@@ -4,11 +4,11 @@ This is the code base for my final project of the Computer Vision 2024-fall cour
 I made some changes to the training process, dataset and hyperparameters.
 
 ## How to run the model
-1. Install the denpendencies.
+### Install the denpendencies
 
     pip install -r requirements.txt
 
-2. Prepare the dataset.
+### Prepare the dataset
 
 I use the ImageNet to train my model, please put the downloaded ImageNet dataset in the root directory. The ImageNet dataset should have the following structure.
 
@@ -36,9 +36,9 @@ I use the ImageNet to train my model, please put the downloaded ImageNet dataset
 
 So that it can be correctly loaded with `torchvision.datasets.ImageFolder`.
 
-3. Run the training.
+### Run the training
 
-I trained the model on 6 A100-40G-PCIE for 100 epochs, which roughly takes 10 hours. To train the model from scratch, you need to run the following commands.
+I trained the model on 6 A100-40G-PCIE for 100 epochs, which roughly takes 10 hours. To train the model from scratch, you need to run the following commands. The default code will train both the generator and the descriminator from scratch.
 
     cd src
     python3 main.py

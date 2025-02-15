@@ -5,7 +5,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.strategies import DDPStrategy
-from data import places365DataModule
+from data import ImageNetDataModule
 
 
 def main(args):
@@ -17,7 +17,7 @@ def main(args):
     pl.seed_everything(42)
 
     # Handle the data
-    dm = places365DataModule(args.data_folder, batch_size=args.batch_size)
+    dm = ImageNetDataModule(args.data_folder, batch_size=args.batch_size)
 
     # Define model
     model = LTBC()

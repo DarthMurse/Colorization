@@ -9,7 +9,7 @@ from utils import *
 from torchvision.datasets import Places365
 
 
-class places365DataModule(pl.LightningDataModule):
+class ImageNetDataModule(pl.LightningDataModule):
     def __init__(self, path, batch_size=32, train_prop=0.8):
         super().__init__()
         self.train_path = path
