@@ -16,7 +16,7 @@ class ConvModule(nn.Module):
         self,
         in_features,
         out_features,
-        stride,
+        stride=1,
         kernel_size=3,
         padding=1,
         nonlinearity=torch.relu,
@@ -39,6 +39,20 @@ class ConvModule(nn.Module):
         return h
 
 
+class ResnetBlock(nn.Module):
+    def __init__(self, n_features, nonlinearity=torch.relu):
+        super().__init__()
+        self.conv1 = ConvModule(n_features, n_features, nonlinearity=nonlinearity)
+        self.conv2 = ConvModule(n_features, n_features, nonlinearity=nonlinearity)
+
+    def forward(self, x):
+        identitiy = x
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = x + identitiy
+        return x
+
+
 class UnetBlock(nn.Module):
     def __init__(
         self,
@@ -57,29 +71,25 @@ class UnetBlock(nn.Module):
         downconv = nn.Conv2d(
             input_c, ni, kernel_size=4, stride=2, padding=1, bias=False
         )
+        downmiddle = [ResnetBlock(ni), ResnetBlock(ni)]
         downrelu = nn.LeakyReLU(0.2, True)
         downnorm = nn.BatchNorm2d(ni)
+        upconv = nn.ConvTranspose2d(ni, nf, kernel_size=4, stride=2, padding=1)
         uprelu = nn.ReLU(True)
         upnorm = nn.BatchNorm2d(nf)
+        upmiddle = [ResnetBlock(ni), ResnetBlock(ni)]
 
         if outermost:
-            upconv = nn.ConvTranspose2d(ni * 2, nf, kernel_size=4, stride=2, padding=1)
-            down = [downconv]
-            up = [uprelu, upconv, nn.Tanh()]
+            down = [downconv, downrelu] + downmiddle
+            up = upmiddle + [upconv, nn.Tanh()]
             model = down + [submodule] + up
         elif innermost:
-            upconv = nn.ConvTranspose2d(
-                ni, nf, kernel_size=4, stride=2, padding=1, bias=False
-            )
-            down = [downrelu, downconv]
-            up = [uprelu, upconv, upnorm]
+            down = [downconv, downnorm, downrelu] + downmiddle
+            up = upmiddle + [upconv, upnorm, uprelu]
             model = down + up
         else:
-            upconv = nn.ConvTranspose2d(
-                ni * 2, nf, kernel_size=4, stride=2, padding=1, bias=False
-            )
-            down = [downrelu, downconv, downnorm]
-            up = [uprelu, upconv, upnorm]
+            down = [downconv, downnorm, downrelu] + downmiddle
+            up = upmiddle + [upconv, upnorm, uprelu]
             if dropout:
                 up += [nn.Dropout(0.5)]
             model = down + [submodule] + up
@@ -89,7 +99,7 @@ class UnetBlock(nn.Module):
         if self.outermost:
             return self.model(x)
         else:
-            return torch.cat([x, self.model(x)], 1)
+            return x + self.model(x)
 
 
 class Unet(nn.Module):
@@ -211,7 +221,7 @@ class LTBC(pl.LightningModule):
         self.net_D = init_weights(self.net_D)
 
         # checkpoint = torch.load(
-        #    "./logs/tensorboard_logs/lightning_logs/version_14/checkpoints/last.ckpt"
+        #    "./logs/tensorboard_logs/lightning_logs/version_17/checkpoints/last.ckpt"
         # )
         # self.load_state_dict(checkpoint["state_dict"], strict=False)
 
@@ -232,7 +242,7 @@ class LTBC(pl.LightningModule):
         )
 
         return opt_G, opt_D
-        # return opt_G
+        return opt_G
 
     def training_step(self, batch, batch_idx):
         self.net_G.train()

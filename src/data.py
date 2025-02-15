@@ -82,7 +82,7 @@ class places365DataModule(pl.LightningDataModule):
         return torch.utils.data.DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            shuffle=False,
+            shuffle=True,
             num_workers=8,
             pin_memory=True,
         )

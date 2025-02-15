@@ -5,12 +5,15 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.strategies import DDPStrategy
-from model import LTBC
 from data import places365DataModule
 
 
 def main(args):
-    # Settings
+    # Setting
+    if args.size == "small":
+        from model import LTBC
+    else:
+        from large_model import LTBC
     pl.seed_everything(42)
 
     # Handle the data
@@ -55,5 +58,6 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=16)
 
     parser.add_argument("--data_folder", type=str, default="../imagenet/train/")
+    parser.add_argument("--size", type=str, default="large")
     args = parser.parse_args()
     main(args)
